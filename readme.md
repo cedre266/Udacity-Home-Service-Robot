@@ -1,7 +1,5 @@
 # Udacity-Home-Service-Robot
 
-I NEED TO CHANGE PATHS IN TEST_SLAM.SH SO THAT THEY CAN ADAPT TO ANY CATKIN_WS FOLDER, NOT ONLY TO VM.
-
 ## Overview
 Last project in Udacity's Robotics Software Engineer Nanodegree.
 
