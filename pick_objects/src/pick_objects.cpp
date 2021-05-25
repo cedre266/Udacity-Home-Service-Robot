@@ -23,12 +23,13 @@ int main(int argc, char** argv){
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
 
-  // Define a position and orientation for the robot to reach
-  goal.target_pose.pose.position.x = 5.0;
-  goal.target_pose.pose.orientation.w = 1.0;
+  // Define a position and orientation for the robot to reach as pick-up location
+  goal.target_pose.pose.position.x = 2.4;
+  goal.target_pose.pose.position.y = -5.5;
+  goal.target_pose.pose.orientation.w = 1;
 
-   // Send the goal position and orientation for the robot to reach
-  ROS_INFO("Sending goal");
+  // Send the goal position and orientation for the robot to reach
+  ROS_INFO("Sending pickup goal");
   ac.sendGoal(goal);
 
   // Wait an infinite time for the results
@@ -36,9 +37,31 @@ int main(int argc, char** argv){
 
   // Check if the robot reached its goal
   if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    ROS_INFO("Hooray, the base moved 5 meters forward");
+    ROS_INFO("Turtlebot reached pickup zone successfully");
   else
-    ROS_INFO("The base failed to move forward 5 meters for some reason");
+    ROS_INFO("Turtlebot failed to move to pickup zone for some reason");
+
+  // Pause the robot 5 seconds at pickup location
+  ROS_INFO("Waiting 5 seconds to pick up object");
+  ros::Duration(5.0).sleep();
+
+  // Define a position and orientation for the robot to reach as drop-off location
+  goal.target_pose.pose.position.x = 5.4;
+  goal.target_pose.pose.position.y = -4.6;
+  goal.target_pose.pose.orientation.w = 1;
+
+  // Send the goal position and orientation for the robot to reach
+  ROS_INFO("Sending dropoff goal");
+  ac.sendGoal(goal);
+
+  // Wait an infinite time for the results
+  ac.waitForResult();
+
+  // Check if the robot reached its goal
+  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+    ROS_INFO("Turtlebot reached dropoff zone successfully");
+  else
+    ROS_INFO("Turtlebot failed to move to dropoff zone for some reason");
 
   return 0;
 }
