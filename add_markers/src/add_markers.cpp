@@ -127,6 +127,7 @@ int main( int argc, char** argv )
     }
 
     // Simulate picking up
+    ros::Duration(1.0).sleep(); 
     ROS_INFO("Picking up object...");
     // Delete virtual object then wait 5 seconds
     marker.action = visualization_msgs::Marker::DELETE;
@@ -140,29 +141,16 @@ int main( int argc, char** argv )
     }
 
     // Re-add the object at drop off zone
+    ros::Duration(1.0).sleep(); 
     ROS_INFO("Dropping the object...");
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = 6;
     marker.pose.position.y = -4.5;
-    //marker.lifetime = ros::Duration();
 
-      /*while (marker_pub.getNumSubscribers() < 1)
-      {
-        if (!ros::ok())
-        {
-          return 0;
-        }
-        ROS_WARN_ONCE("Please create a subscriber to the marker");
-        sleep(1);
-      }*/
     marker_pub.publish(marker);
     
     // Wait 10 seconds before exiting the code
     ros::Duration(10.0).sleep(); 
-    
-    //ros::spin();
-
-    //r.sleep();
 
     return 0;
   }
