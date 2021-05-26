@@ -63,5 +63,8 @@ int main(int argc, char** argv){
   else
     ROS_INFO("Turtlebot failed to move to dropoff zone for some reason");
 
+  // Wait 10 seconds before exiting the code
+  ros::Duration(10.0).sleep(); 
+
   return 0;
 }

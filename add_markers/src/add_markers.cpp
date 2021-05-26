@@ -1,80 +1,92 @@
-/*
- * Copyright (c) 2010, Willow Garage, Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Willow Garage, Inc. nor the names of its
- *       contributors may be used to endorse or promote products derived from
- *       this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
-// %Tag(FULLTEXT)%
-// %Tag(INCLUDES)%
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
-// %EndTag(INCLUDES)%
+#include <nav_msgs/Odometry.h>
+#include <math.h>
 
-// %Tag(INIT)%
+// Pickup location
+double pickup_x = 2.4;
+double pickup_y = -5.5;
+
+// Dropoff location
+double dropoff_x = 5.4;
+double dropoff_y = -4.6;
+
+// Current position of the robot
+double current_pose_x = 0;
+double current_pose_y = 0;
+
+// Minimum distance to consider the robot has reached its goal position
+double dist_threshold = 0.4;
+
+// Flags to know if we reach one of the goal locations
+bool reached_pickup_zone = false;
+bool reached_dropoff_zone = false;
+
+double distance(double x1, double x2, double y1, double y2)
+{
+  return sqrt(pow((x1 - x2), 2.0) + pow((y1 - y2), 2.0));
+}
+
+// Get the current position of the robot and check if at pickup or dropoff location
+void odometry_callback(const nav_msgs::Odometry::ConstPtr &msg)
+{
+  current_pose_x = msg->pose.pose.position.y;
+  current_pose_y = msg->pose.pose.position.x * (-1);
+
+  double dist;
+
+  if (reached_pickup_zone == false)
+  {
+    dist = distance(current_pose_x, pickup_x, current_pose_y, pickup_y);
+    //ROS_INFO("Distance = %lf", dist);
+    if (dist <= dist_threshold)
+    {
+      reached_pickup_zone = true;
+      ROS_INFO("Reached picking up zone");
+    }
+  }
+  else
+  {
+    dist = distance(current_pose_x, dropoff_x, current_pose_y, dropoff_y);
+    if (dist <= dist_threshold)
+    {
+      reached_dropoff_zone = true;
+      ROS_INFO("Reached dropping off zone");
+    }
+  }
+ 
+}
+
 int main( int argc, char** argv )
 {
   ros::init(argc, argv, "add_markers");
   ros::NodeHandle n;
   ros::Rate r(1);
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-// %EndTag(INIT)%
+  ros::Subscriber odometry_sub = n.subscribe("odom", 10, odometry_callback);
 
   // Set our initial shape type to be a cube
-// %Tag(SHAPE_INIT)%
   uint32_t shape = visualization_msgs::Marker::CUBE;
-// %EndTag(SHAPE_INIT)%
 
-// %Tag(MARKER_INIT)%
   while (ros::ok())
   {
     visualization_msgs::Marker marker;
     // Set the frame ID and timestamp.  See the TF tutorials for information on these.
     marker.header.frame_id = "map";
     marker.header.stamp = ros::Time::now();
-// %EndTag(MARKER_INIT)%
 
     // Set the namespace and id for this marker.  This serves to create a unique ID
     // Any marker sent with the same namespace and id will overwrite the old one
-// %Tag(NS_ID)%
-    marker.ns = "basic_shapes";
+    marker.ns = "virtual_object";
     marker.id = 0;
-// %EndTag(NS_ID)%
 
-    // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
-// %Tag(TYPE)%
+    // Set the marker type.
     marker.type = shape;
-// %EndTag(TYPE)%
 
     // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
-// %Tag(ACTION)%
     marker.action = visualization_msgs::Marker::ADD;
-// %EndTag(ACTION)%
 
     // Set the pose of the marker at pick up zone.  This is a full 6DOF pose relative to the frame/time specified in the header
-// %Tag(POSE)%
     marker.pose.position.x = 3;
     marker.pose.position.y = -5.5;
     marker.pose.position.z = 1;
@@ -82,29 +94,21 @@ int main( int argc, char** argv )
     marker.pose.orientation.y = 0.0;
     marker.pose.orientation.z = 0.0;
     marker.pose.orientation.w = 1.0;
-// %EndTag(POSE)%
 
     // Set the scale of the marker -- 1x1x1 here means 1m on a side
-// %Tag(SCALE)%
     marker.scale.x = 0.1;
     marker.scale.y = 0.1;
     marker.scale.z = 0.1;
-// %EndTag(SCALE)%
 
     // Set the color -- be sure to set alpha to something non-zero!
-// %Tag(COLOR)%
     marker.color.r = 1.0f;
     marker.color.g = 1.0f;
     marker.color.b = 0.0f;
     marker.color.a = 1.0;
-// %EndTag(COLOR)%
 
-// %Tag(LIFETIME)%
     marker.lifetime = ros::Duration();
-// %EndTag(LIFETIME)%
 
     // Publish the marker
-// %Tag(PUBLISH)%
     while (marker_pub.getNumSubscribers() < 1)
     {
       if (!ros::ok())
@@ -115,37 +119,52 @@ int main( int argc, char** argv )
       sleep(1);
     }
     marker_pub.publish(marker);
-    
-    // Wait 5 seconds
-    ros::Duration(5.0).sleep();
-// %EndTag(PUBLISH)%
 
+    // Spin until reaching pickup zone
+    while (reached_pickup_zone == false)
+    {
+      ros::spinOnce();
+    }
+
+    // Simulate picking up
+    ROS_INFO("Picking up object...");
     // Delete virtual object then wait 5 seconds
     marker.action = visualization_msgs::Marker::DELETE;
     marker_pub.publish(marker);
-    ros::Duration(5.0).sleep();
+    ros::Duration(5.0).sleep(); 
+
+    // Spin until reaching dropoff zone
+    while (reached_dropoff_zone == false)
+    {
+      ros::spinOnce();
+    }
 
     // Re-add the object at drop off zone
+    ROS_INFO("Dropping the object...");
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = 6;
     marker.pose.position.y = -4.5;
-    
-    while (marker_pub.getNumSubscribers() < 1)
-    {
-      if (!ros::ok())
-      {
-        return 0;
-      }
-      ROS_WARN_ONCE("Please create a subscriber to the marker");
-      sleep(1);
-    }
-    marker_pub.publish(marker);
-    ros::spin();
+    //marker.lifetime = ros::Duration();
 
-// %Tag(SLEEP_END)%
-    r.sleep();
+      /*while (marker_pub.getNumSubscribers() < 1)
+      {
+        if (!ros::ok())
+        {
+          return 0;
+        }
+        ROS_WARN_ONCE("Please create a subscriber to the marker");
+        sleep(1);
+      }*/
+    marker_pub.publish(marker);
+    
+    // Wait 10 seconds before exiting the code
+    ros::Duration(10.0).sleep(); 
+    
+    //ros::spin();
+
+    //r.sleep();
+
+    return 0;
   }
-// %EndTag(SLEEP_END)%
 }
-// %EndTag(FULLTEXT)%
 

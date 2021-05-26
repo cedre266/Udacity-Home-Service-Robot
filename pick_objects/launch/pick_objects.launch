@@ -1,6 +1,6 @@
 <launch>
 
- <!-- The drive_bot node -->
+ <!-- The pick_objects node -->
   <node name="pick_objects" type="pick_objects" pkg="pick_objects" output="screen">
   </node>
 
