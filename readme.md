@@ -5,6 +5,9 @@ Last project in Udacity's Robotics Software Engineer Nanodegree.
 
 The goal is to simulate a home service robot, that navigates into an indoor environment, goes to some place to pick up a virtual object, then moves to a second place to drop the virtual object off.
 
+Video:
+[![Demo Video](https://img.youtube.com/vi/nny7iTuVhYk/0.jpg)](https://www.youtube.com/watch?v=nny7iTuVhYk)
+
 Made under ROS-Kinetic and Gazebo-7.
 
 **Author: Cedric Perney**
