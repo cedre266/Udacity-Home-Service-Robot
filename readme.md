@@ -42,7 +42,7 @@ All shell scripts launch the turtlebot robot into a custom world.
 - **`test_slam.sh`**: to test SLAM with the gmapping package and teleoperation. It can be used to create and save a map of the environment.
 - **`test_navigation.sh`**: to test manual navigation with the AMCL package. It is possible to give navigation goals to the robot through Rviz.
 - **`pick_objects.sh`**: to test sending navigation goals through code, calls the `pick_objects` node.
-- **`add_markers.sh`**: to test creating virtual objects, calls the `add_markers` node.
+- **`add_markers.sh`**: to test creating virtual objects, calls the `add_markers_time` node, which spawns a virtual object, removes it after 5 seconds and respawn it in a new location after 5 more seconds.
 - **`home_service.sh`**: the complete simulation. In addition to spawning the turtlebot in the custom world, launching the AMCL package for localization and opening Rviz for visualization, it also launches both the `add_markers` and `pick_objects` nodes that command the robot to its pickup and dropoff zones, using the ROS navigations stack, while moving the virtual object.
 
 ## How does it work
