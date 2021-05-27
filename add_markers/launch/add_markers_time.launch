@@ -1,0 +1,7 @@
+<launch>
+
+ <!-- The add_markers_time node -->
+  <node name="add_markers_time" type="add_markers_time" pkg="add_markers" output="screen">
+  </node>
+
+</launch>

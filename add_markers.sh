@@ -8,5 +8,5 @@ sleep 5
 # Launch Rviz set-up for navigation
 xterm -e "source $(pwd)/../devel/setup.bash; roslaunch add_markers view_navigation_marker.launch" &
 sleep 5
-# Launch add_markers.cpp
-xterm -e "source $(pwd)/../devel/setup.bash; roslaunch add_markers add_markers.launch"
+# Launch add_markers_time.cpp
+xterm -e "source $(pwd)/../devel/setup.bash; roslaunch add_markers add_markers_time.launch"

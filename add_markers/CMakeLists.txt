@@ -119,8 +119,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 add_executable(add_markers src/add_markers.cpp)
+add_executable(add_markers_time src/add_markers_time.cpp)
 add_dependencies(add_markers ${catkin_EXPORTED_TARGETS})
 target_link_libraries(add_markers ${catkin_LIBRARIES})
+target_link_libraries(add_markers_time ${catkin_LIBRARIES})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
